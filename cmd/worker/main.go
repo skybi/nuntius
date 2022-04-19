@@ -61,12 +61,20 @@ func main() {
 	// Start feeding METARs if necessary
 	if cfg.FeedMETARs {
 		log.Info().Msg("starting the METAR feeder...")
-		feeder := metar.NewFeeder(apiClient, 100, time.Second)
-		feeder.Start()
-		defer feeder.Stop()
-	}
+		feeder := metar.NewFeeder(apiClient, 500, time.Second)
+		if err := feeder.Start(); err != nil {
+			log.Fatal().Err(err).Msg("could not start the METAR feeder")
+		}
+		defer func() {
+			if err := feeder.Stop(); err != nil {
+				log.Error().Err(err).Msg("could not gracefully shut down the METAR feeder")
+			}
+		}()
 
-	// TODO: startup logic
+		workers := metar.InitWorkers(feeder)
+		workers.Start()
+		defer workers.Stop()
+	}
 
 	// Wait for the application to be terminated
 	shutdown := make(chan os.Signal, 1)

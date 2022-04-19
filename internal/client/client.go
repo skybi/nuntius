@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -38,6 +39,10 @@ func (client *Client) execute(request *http.Request) (*http.Response, []byte, er
 		return nil, nil, err
 	}
 	if response.StatusCode < 200 || response.StatusCode > 299 {
+		var errResponse *APIErrorResponse
+		if err := json.Unmarshal(body, &errResponse); err == nil {
+			return nil, nil, errResponse
+		}
 		return nil, nil, fmt.Errorf("HTTP status %d: %s", response.StatusCode, string(body))
 	}
 	return response, body, nil
