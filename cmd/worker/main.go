@@ -6,8 +6,10 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/skybi/nuntius/internal/client"
 	"github.com/skybi/nuntius/internal/config"
+	"github.com/skybi/nuntius/internal/metar"
 	"os"
 	"os/signal"
+	"time"
 )
 
 func main() {
@@ -54,6 +56,14 @@ func main() {
 	// Abort if no feeding is enabled
 	if !cfg.FeedMETARs {
 		log.Fatal().Msg("aborting due to disabled feeding")
+	}
+
+	// Start feeding METARs if necessary
+	if cfg.FeedMETARs {
+		log.Info().Msg("starting the METAR feeder...")
+		feeder := metar.NewFeeder(apiClient, 100, time.Second)
+		feeder.Start()
+		defer feeder.Stop()
 	}
 
 	// TODO: startup logic
