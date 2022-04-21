@@ -34,8 +34,11 @@ func NewFeeder(apiClient *client.Client, batchSize int, interval time.Duration) 
 	}
 }
 
-// Queue queues METARs to feed
+// Queue queues METARs to feed and fixes them beforehand
 func (feeder *Feeder) Queue(metars []string) {
+	for i, metar := range metars {
+		metars[i] = fix(metar)
+	}
 	feeder.queue.Push(metars...)
 }
 
