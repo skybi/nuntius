@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  nuntius:
+    image: "ghcr.io/skybi/nuntius:1.0"
+    container_name: "nuntius"
+    restart: "unless-stopped"
+    environment:
+      SBF_API_ADDRESS: "http://api.domain.example"
+      SBF_API_KEY: "secret-api-key"
+      SBF_FEED_METARS: "true"
